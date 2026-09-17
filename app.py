@@ -1,63 +1,50 @@
-from datetime import datetime
+VALID_PRIORITIES = {"Low", "Medium", "High"}
+VALID_STATUSES = {"Pending", "In Progress", "Completed"}
 
-PROJECT_NAME = "DevTrack"
 
 def create_task(title, description, priority="Medium"):
-"""Create a new task for the project."""
-if not title.strip():
-raise ValueError("Task title cannot be empty")
+	"""Create a validated DevTrack task."""
+	if not isinstance(title, str) or not title.strip():
+		raise ValueError("Task title cannot be empty")
+	if priority not in VALID_PRIORITIES:
+		raise ValueError("Priority must be Low, Medium, or High")
 
-```
-if priority not in ["Low", "Medium", "High"]:
-    raise ValueError("Invalid priority")
+	return {
+		"title": title.strip(),
+		"description": description,
+		"priority": priority,
+		"status": "Pending",
+	}
 
-return {
-    "title": title,
-    "description": description,
-    "priority": priority,
-    "status": "Pending",
-    "created_at": datetime.now().strftime("%Y-%m-%d")
-}
-```
 
 def update_task_status(task, status):
-"""Update the status of an existing task."""
-valid_statuses = ["Pending", "In Progress", "Completed"]
+	"""Update a task status after validating the requested value."""
+	if status not in VALID_STATUSES:
+		raise ValueError("Status must be Pending, In Progress, or Completed")
+	task["status"] = status
+	return task
 
-```
-if status not in valid_statuses:
-    raise ValueError("Invalid task status")
-
-task["status"] = status
-return task
-```
 
 def get_project_summary(tasks):
-"""Return a summary of tasks in the project."""
-return {
-"project": PROJECT_NAME,
-"total_tasks": len(tasks),
-"completed": sum(
-1 for task in tasks if task["status"] == "Completed"
-),
-"pending": sum(
-1 for task in tasks if task["status"] == "Pending"
-)
-}
+	"""Return counts of tasks grouped by status and priority."""
+	summary = {
+		"total": len(tasks),
+		"by_status": {status: 0 for status in VALID_STATUSES},
+		"by_priority": {priority: 0 for priority in VALID_PRIORITIES},
+	}
+	for task in tasks:
+		summary["by_status"][task["status"]] += 1
+		summary["by_priority"][task["priority"]] += 1
+	return summary
 
-if **name** == "**main**":
-task = create_task(
-"Implement login API",
-"Develop and test the user authentication endpoint",
-"High"
-)
 
-```
-update_task_status(task, "In Progress")
-
-summary = get_project_summary([task])
-
-print("Project:", PROJECT_NAME)
-print("Task:", task)
-print("Summary:", summary)
-```
+if __name__ == "__main__":
+	sample_task = create_task(
+		"Prepare release checklist",
+		"Review deployment steps before the next release.",
+		priority="High",
+	)
+	update_task_status(sample_task, "In Progress")
+	project_summary = get_project_summary([sample_task])
+	print("Task:", sample_task)
+	print("Project summary:", project_summary)
